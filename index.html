@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordMaster - Үг цээжлэх тоглоом</title>
+    <style>
+        :root {
+            --blue: #3498db;
+            --yellow: #f1c40f;
+            --green: #2ecc71;
+            --white: #ffffff;
+            --dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--white);
+            color: var(--dark);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: var(--blue);
+            color: white;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 5px solid var(--yellow);
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin-top: 30px;
+        }
+
+        .game-section {
+            background-color: #f9f9f9;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 8px solid var(--green);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h2 { color: var(--blue); }
+
+        /* Memory Card Game Styles */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .card {
+            height: 100px;
+            background-color: var(--blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .card.flipped {
+            background-color: var(--yellow);
+            color: var(--dark);
+        }
+
+        /* Drawing Canvas Styles */
+        canvas {
+            border: 2px dashed var(--blue);
+            background: white;
+            cursor: crosshair;
+            margin-top: 10px;
+        }
+
+        .controls {
+            margin-top: 10px;
+        }
+
+        button {
+            background-color: var(--green);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover { opacity: 0.8; }
+
+        input {
+            padding: 10px;
+            border: 2px solid var(--blue);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>WordMaster: Шинэ үг сурцгаая!</h1>
+</header>
+
+<div class="container">
+    
+    <div class="game-section">
+        <h2>1. Үг холбох (Memory Game)</h2>
+        <p>Англи үг болон Монгол утгыг ижилсүүлж олоорой.</p>
+        <div class="grid" id="game-grid">
+            </div>
+    </div>
+
+    <div class="game-section">
+        <h2>2. Зураад цээжил</h2>
+        <p>Үгээ бичээд, түүнийг илэрхийлэх зураг зураарай.</p>
+        <input type="text" id="word-input" placeholder="Цээжлэх үгээ бичих...">
+        <br>
+        <canvas id="paintCanvas" width="400" height="200"></canvas>
+        <div class="controls">
+            <button onclick="clearCanvas()">Арилгах</button>
+            <button style="background-color: var(--blue);" onclick="saveDrawing()">Карт болгох</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Memory Game Logic
+    const words = [
+        {en: 'Nature', mn: 'Байгаль'},
+        {en: 'Restoration', mn: 'Нөхөн сэргээлт'},
+        {en: 'Green', mn: 'Ногоон'},
+        {en: 'Future', mn: 'Ирээдүй'}
+    ];
+
+    let cardValues = [];
+    words.forEach(w => {
+        cardValues.push(w.en);
+        cardValues.push(w.mn);
+    });
+
+    // Shuffle cards
+    cardValues.sort(() => 0.5 - Math.random());
+
+    const grid = document.getElementById('game-grid');
+    cardValues.forEach(val => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.value = val;
+        card.innerText = '?';
+        card.onclick = function() {
+            this.classList.toggle('flipped');
+            this.innerText = this.classList.contains('flipped') ? this.dataset.value : '?';
+        };
+        grid.appendChild(card);
+    });
+
+    // Drawing Logic
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+    let painting = false;
+
+    function startPosition(e) { painting = true; draw(e); }
+    function finishedPosition() { painting = false; ctx.beginPath(); }
+    function draw(e) {
+        if (!painting) return;
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#2c3e50';
+
+        ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+    }
+
+    canvas.addEventListener('mousedown', startPosition);
+    canvas.addEventListener('mouseup', finishedPosition);
+    canvas.addEventListener('mousemove', draw);
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function saveDrawing() {
+        alert("Зургийг амжилттай хадгаллаа! Одоо карт болгон ашиглаж болно.");
+    }
+</script>
+
+</body>
+</html>
